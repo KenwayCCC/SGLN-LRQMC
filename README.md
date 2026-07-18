@@ -4,7 +4,7 @@ Official implementation of **SGLN-LRQMC** for color image completion. The method
 
 ## Demo
 
-The following short example reconstructs **Peppers** under a 85% missing-pixel setting. Click the preview to open the full-resolution video.
+The following short example reconstructs **Peppers**  under the scratch mask.
 
 [![Peppers reconstruction demo](assets/Peppers_demo.gif)](assets/Peppers_demo.mp4)
 
@@ -59,7 +59,7 @@ To use DRUNet in the local-prior branch, replace the denoiser option:
 ```bash
 python main_SGLN_LRQMC.py \
   --dataset CSet12 \
-  --image Peppers \
+  --image Airplane \
   --mr 0.85 \
   --local-denoiser drunet \
   --output outputs/Peppers_MR85_DRUNet.png

@@ -12,11 +12,9 @@ Official PyTorch/CuPy implementation of **SGLN-LRQMC** for color image completio
 
 ## Demo
 
-The following short example reconstructs **Peppers** under a 85% missing-pixel setting.
+The following short example reconstructs **Peppers** under a 85% missing-pixel setting. Click the preview to open the full-resolution video.
 
-<video src="assets/Peppers_demo.mp4" controls muted loop width="720"></video>
-
-If the embedded player is not rendered by your GitHub client, open [the demo video](assets/Peppers_demo.mp4) directly.
+[![Peppers reconstruction demo](assets/Peppers_demo.gif)](assets/Peppers_demo.mp4)
 
 ## Repository layout
 

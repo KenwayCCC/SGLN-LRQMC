@@ -1,14 +1,6 @@
 # SGLN-LRQMC
 
-Official PyTorch/CuPy implementation of **SGLN-LRQMC** for color image completion. The method combines quaternion-aware global structure modeling with complementary learned and nonlocal image priors in an iterative reconstruction framework.
-
-## Highlights
-
-- Quaternion representation for joint color-channel modeling.
-- Global structural regularization with local and nonlocal image priors.
-- A choice of **FFDNet** or **DRUNet** in the learned local-prior branch.
-- CUDA implementation with PyTorch and CuPy interoperability.
-- Reproducible command-line experiments with fixed masks and seeds.
+Official implementation of **SGLN-LRQMC** for color image completion. The method combines quaternion-aware global structure modeling with complementary learned and nonlocal image priors in an iterative reconstruction framework.
 
 ## Demo
 
@@ -56,10 +48,10 @@ Run the bundled CSet12 example from the repository root:
 ```bash
 python main_SGLN_LRQMC.py \
   --dataset CSet12 \
-  --image Peppers \
+  --image Airplane \
   --mr 0.85 \
   --local-denoiser ffdnet \
-  --output outputs/Peppers_MR85.png
+  --output outputs/Airplane_MR85.png
 ```
 
 To use DRUNet in the local-prior branch, replace the denoiser option:

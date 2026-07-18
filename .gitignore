@@ -1,0 +1,23 @@
+# Python bytecode and tooling
+__pycache__/
+*.py[cod]
+*.so
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local environments and editor settings
+.venv/
+venv/
+env/
+.idea/
+.vscode/
+
+# Generated reconstructions and experiment outputs
+outputs/
+results/
+*.log
+
+# Operating-system files
+.DS_Store
+Thumbs.db

@@ -25,7 +25,7 @@ class SGLNLRQMCConfig:
     seed: int
     equivariant_pnp: bool
     evaluate_ssim: bool
-    ema_weight: float = 0.0
+    ema_weight: float = 0
     truncation: int = 0
     local_denoiser: Literal['ffdnet', 'drunet'] = 'ffdnet'
     cbm3d_kwargs: dict = field(default_factory=dict)

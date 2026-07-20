@@ -145,10 +145,22 @@ def sgln_lrqmc(config: SGLNLRQMCConfig):
         m_local = s - u / mu
         n_nonlocal = t_pnp - v / mu
 
-        # Hard data consistency for noiseless completion:
-        # X_{Omega^c} = (Gamma(E) + M + N) / 3, X_{Omega} = Y.
         x_real = missing_mask * (qcomplex_to_rgb(e) + m_local + n_nonlocal) / 3.0 + y_real
+        consensus_rgb = (
+                qcomplex_to_rgb(z_q - lambda_q / mu)
+                + s - u / mu
+                + t_pnp - v / mu
+        )
+        x_real = torch.where(
+                omega_mask.bool(),
+                y_real,
+                missing_mask * consensus_rgb / 3.0
+                + omega_mask
+                * (mu * consensus_rgb + y_real)
+                / (1.0 + 3.0 * mu)
+        )
         x = rgb_to_qcomplex(x_real)
+
         x_ema_real = ema_weight * x_ema_real + (1.0 - ema_weight) * x_real
 
         sigma_s = np.sqrt(gamma / mu)
@@ -178,7 +190,7 @@ def sgln_lrqmc(config: SGLNLRQMCConfig):
         v.add_(mu * (x_real - t_pnp))
         mu = min(rho * mu, mu_max)
 
-        x_eval = torch.clamp(x_ema_real / 255.0, 0.0, 1.0)
+        x_eval = missing_mask * torch.clamp(x_ema_real / 255.0, 0.0, 1.0) + y_real/255
         if k > 0 and tol>0:
             diff = x_real - x_prev_real
             rel_change = torch.linalg.vector_norm(diff) / (

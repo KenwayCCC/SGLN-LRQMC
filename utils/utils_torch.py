@@ -180,7 +180,7 @@ def equivariant_denoise_torch(img, sigma, denoise_handle, equivariant_pnp, mode=
     if not equivariant_pnp:
         mode = 1
     else:
-        sigma = max(sigma, 10) # Prevent the strength from being too low when using a random transform
+        sigma = max(sigma, 10) # Prevent the strength from being too low when using a random transform according to DPIR.
     transformed = apply_d4_transform_torch(img, mode)
     denoised = denoise_handle(transformed, sigma)
     return invert_d4_transform_torch(denoised, mode).contiguous()

@@ -1,3 +1,19 @@
-# Install PyTorch and CuPy builds that match your CUDA runtime separately.
-numpy>=1.24
-Pillow>=9.0
+# Runtime dependencies for SGLN-LRQMC (Python 3.10+ and an NVIDIA GPU required).
+#
+# PyTorch and CuPy must both expose CUDA support.  The CUDA 12 CuPy wheel below
+# works with NVIDIA drivers that support CUDA 12 or later.  For a CUDA 11-only
+# driver, replace `cupy-cuda12x` with `cupy-cuda11x` (do not install both).
+# Install a CUDA-enabled PyTorch wheel appropriate for your platform if pip
+# selects a CPU-only build; see https://pytorch.org/get-started/locally/.
+
+# Array and image I/O
+numpy>=1.24,<3
+Pillow>=9.0,<12
+
+# Learned local-prior denoisers (FFDNet and DRUNet)
+torch>=2.1
+
+# CUDA nonlocal prior (CBM3D)
+cupy-cuda12x>=13.4,<15
+bm3d-cupy==0.1.3
+PyWavelets>=1.5,<2

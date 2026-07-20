@@ -43,16 +43,11 @@ git lfs pull
 
 ## Quick start
 
-In Windows PowerShell, activate the environment, change to the repository
-directory, and run the following one-line command:
-
 ```powershell
-conda activate Clon_CV
-cd "C:\Users\Analysis\Desktop\代码\Quaternion\SGLN-LRQMC"
 python main_SGLN_LRQMC.py --dataset CSet12 --image Airplane --mr 0.85 --local-denoiser ffdnet --output outputs/Airplane_MR85.png
 ```
 
-To use DRUNet in the local-prior branch:
+To use DRUNet in the local prior branch:
 
 ```powershell
 python main_SGLN_LRQMC.py --dataset CSet12 --image Airplane --mr 0.85 --local-denoiser drunet --output outputs/Airplane_MR85_DRUNet.png
@@ -61,11 +56,8 @@ python main_SGLN_LRQMC.py --dataset CSet12 --image Airplane --mr 0.85 --local-de
 You can also specify an arbitrary image and binary mask:
 
 ```powershell
-python main_SGLN_LRQMC.py --img-path "C:\path\to\image.png" --mask-path "C:\path\to\mask.png" --lambda 1.0 --alpha 0.1 --gamma 20 --eta 20 --iterations 100 --output outputs\reconstruction.png
+python main_SGLN_LRQMC.py --img-path "path/to/image.png" --mask-path "path/to/mask.png" --lambda 1.0 --alpha 0.1 --gamma 20 --eta 20 --iterations 100 --output outputs/reconstruction.png
 ```
-
-The mask uses `1` for observed pixels and `0` for missing pixels. The bundled masks follow the naming convention `Dataset/Mask_XX.png`, where `XX` is the missing percentage.
-
 ## Command-line interface
 
 ```bash

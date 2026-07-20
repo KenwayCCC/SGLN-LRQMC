@@ -4,9 +4,9 @@ Official implementation of **SGLN-LRQMC** for color image completion. The method
 
 ## Demo
 
-The following short example reconstructs **Peppers**  under the scratch mask.
+The following short example reconstructs **Bee** using a random mask at **MR = 0.85**. Click the preview to open the full-resolution video.
 
-[![Peppers reconstruction demo](assets/Peppers_demo.gif)](assets/Peppers_demo.mp4)
+[![Bee reconstruction demo with a random mask at MR = 0.85](assets/Bee_Demo.gif)](assets/Bee_Demo.mp4)
 
 ## Repository layout
 
@@ -59,7 +59,7 @@ To use DRUNet in the local-prior branch, replace the denoiser option:
 ```bash
 python main_SGLN_LRQMC.py \
   --dataset CSet12 \
-  --image Airplane \
+  --image Peppers \
   --mr 0.85 \
   --local-denoiser drunet \
   --output outputs/Peppers_MR85_DRUNet.png

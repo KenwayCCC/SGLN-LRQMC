@@ -24,22 +24,15 @@ SGLN-LRQMC/
 
 ## Environment
 
-The implementation requires a CUDA-capable GPU. Create a Python environment (Python 3.10 or newer is recommended), then install the lightweight dependencies:
+The implementation requires a NVIDIA GPU. Create a Python environment (Python 3.10 or newer is recommended), then install the lightweight dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Install a PyTorch build and a CuPy build compatible with your local CUDA runtime. For example, consult the official installation guides for [PyTorch](https://pytorch.org/get-started/locally/) and [CuPy](https://docs.cupy.dev/en/stable/install.html).
+Install a PyTorch build and a CuPy build compatible with your local GPU. For example, consult the official installation guides for [PyTorch](https://pytorch.org/get-started/locally/) and [CuPy](https://docs.cupy.dev/en/stable/install.html).
 
-The nonlocal branch also requires a CUDA-compatible `bm3d_cupy` module. Make sure it is importable in the active environment before running the program.
-
-The DRUNet checkpoint is stored with Git LFS. After cloning, retrieve large files with:
-
-```bash
-git lfs install
-git lfs pull
-```
+The nonlocal denoiser also requires a CUDA-compatible `bm3d_cupy` module. Make sure it is importable in the active environment before running the program.
 
 ## Quick start
 
@@ -50,7 +43,7 @@ python main_SGLN_LRQMC.py --dataset CSet12 --image Airplane --mr 0.85 --local-de
 To use DRUNet in the local prior branch:
 
 ```powershell
-python main_SGLN_LRQMC.py --dataset CSet12 --image Airplane --mr 0.85 --local-denoiser drunet --output outputs/Airplane_MR85_DRUNet.png
+python main_SGLN_LRQMC.py --dataset CSet12 --image Airplane --mr 0.75 --local-denoiser drunet --output outputs/Airplane_MR85_DRUNet.png
 ```
 
 You can also specify an arbitrary image and binary mask:

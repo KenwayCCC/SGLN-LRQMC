@@ -19,6 +19,7 @@ from utils.utils_torch import (
     qcomplex_to_rgb,
     rgb_to_qcomplex,
     update_lowrank_qcomplex,
+    update_X
 )
 
 
@@ -145,20 +146,21 @@ def sgln_lrqmc(config: SGLNLRQMCConfig):
         m_local = s - u / mu
         n_nonlocal = t_pnp - v / mu
 
-        x_real = missing_mask * (qcomplex_to_rgb(e) + m_local + n_nonlocal) / 3.0 + y_real
-        consensus_rgb = (
-                qcomplex_to_rgb(z_q - lambda_q / mu)
-                + s - u / mu
-                + t_pnp - v / mu
-        )
-        x_real = torch.where(
-                omega_mask.bool(),
-                y_real,
-                missing_mask * consensus_rgb / 3.0
-                + omega_mask
-                * (mu * consensus_rgb + y_real)
-                / (1.0 + 3.0 * mu)
-        )
+        # x_real = missing_mask * (qcomplex_to_rgb(e) + m_local + n_nonlocal) / 3.0 + y_real
+        # consensus_rgb = (
+        #         qcomplex_to_rgb(z_q - lambda_q / mu)
+        #         + s - u / mu
+        #         + t_pnp - v / mu
+        # )
+        # x_real = torch.where(
+        #         omega_mask.bool(),
+        #         y_real,
+        #         missing_mask * consensus_rgb / 3.0
+        #         + omega_mask
+        #         * (mu * consensus_rgb + y_real)
+        #         / (1.0 + 3.0 * mu)
+        # )
+        x_real = update_X(e, m_local, n_nonlocal, mu, y_real, missing_mask)
         x = rgb_to_qcomplex(x_real)
 
         x_ema_real = ema_weight * x_ema_real + (1.0 - ema_weight) * x_real

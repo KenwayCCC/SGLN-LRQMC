@@ -24,10 +24,14 @@ SGLN-LRQMC/
 
 ## Environment
 
-The implementation requires a NVIDIA GPU. Create a Python environment (Python 3.10 or newer is recommended), then install the lightweight dependencies:
+The implementation requires **64-bit Python 3.10 on Windows** and a
+CUDA-capable NVIDIA GPU. Create and activate a Python 3.10 environment, then
+install the dependencies:
 
-```bash
-pip install -r requirements.txt
+```powershell
+conda create -n SGLN-LRQMC python=3.10
+conda activate SGLN-LRQMC
+python -m pip install -r requirements.txt
 ```
 
 Install a PyTorch build and a CuPy build compatible with your local GPU. For example, consult the official installation guides for [PyTorch](https://pytorch.org/get-started/locally/) and [CuPy](https://docs.cupy.dev/en/stable/install.html).
@@ -51,6 +55,14 @@ You can also specify an arbitrary image and binary mask:
 ```powershell
 python main_SGLN_LRQMC.py --img-path "path/to/image.png" --mask-path "path/to/mask.png" --lambda 1.0 --alpha 0.1 --gamma 20 --eta 20 --iterations 100 --output outputs/reconstruction.png
 ```
+
+The mask uses `1` for observed pixels and `0` for missing pixels. The bundled masks follow the naming convention `Dataset/Mask_XX.png`, where `XX` is the missing percentage.
+
+After reconstruction, the program opens a side-by-side comparison of the
+**Original Image**, **Observed Image**, and **Recovered Image**. This makes it
+easy to inspect the missing pixels and the reconstruction result in one view.
+For headless or automated runs, add `--no-show-comparison`.
+
 ## Command-line interface
 
 ```bash
@@ -70,6 +82,7 @@ Common options include:
 | `--iterations`, `--tol` | Control the iteration budget and stopping criterion. |
 | `--equivariant-pnp`, `--no-equivariant-pnp` | Enable or disable the transformation-based stabilization. |
 | `--output` | Save the reconstructed color image. |
+| `--show-comparison`, `--no-show-comparison` | Enable or disable the final three-image comparison window. |
 
 ## Reproducibility
 

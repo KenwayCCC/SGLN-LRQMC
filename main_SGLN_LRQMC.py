@@ -10,6 +10,7 @@ python main_SGLN_LRQMC.py --img-path C:\\data\\image.png --mask-path C:\\data\\m
 
 import argparse
 import random
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -17,8 +18,17 @@ from PIL import Image
 
 from config import SGLNLRQMCConfig
 
-
 ROOT = Path(__file__).resolve().parent
+
+
+def validate_python_version():
+    """Fail early with a clear message when the runtime module cannot load."""
+    if sys.version_info[:2] != (3, 10):
+        raise RuntimeError(
+            'SGLN-LRQMC requires 64-bit CPython 3.10 because the Windows '
+            'runtime module targets cp310-win_amd64. '
+            f'Current interpreter: Python {sys.version.split()[0]} at {sys.executable}'
+        )
 
 
 def set_deterministic_seed(seed):
@@ -94,6 +104,12 @@ def build_parser():
                            default=True, help='Compute SSIM in addition to PSNR.')
     run_group.add_argument('--output', type=Path, default=None,
                            help='Optional path for saving the selected reconstruction PNG.')
+    run_group.add_argument(
+        '--show-comparison',
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help='Show Original, Observed, and Recovered images after completion.',
+    )
     return parser
 
 
@@ -107,16 +123,42 @@ def resolve_paths(args):
     return img_path, mask_path
 
 
+def show_image_comparison(img_path, observed_mask, img_recovery):
+    """Display the original, masked observation, and recovered image side by side."""
+    import matplotlib.pyplot as plt
+
+    original = np.asarray(Image.open(img_path).convert('RGB'), dtype=np.uint8)
+    mask = np.asarray(observed_mask, dtype=np.float32)
+    if mask.ndim == 2:
+        mask = mask[:, :, None]
+    observed = np.clip(original.astype(np.float32) * mask, 0, 255).astype(np.uint8)
+
+    figure, axes = plt.subplots(1, 3, figsize=(15, 5), constrained_layout=True)
+    panels = (
+        ('Original Image', original),
+        ('Observed Image', observed),
+        ('Recovered Image', img_recovery),
+    )
+    for axis, (title, image) in zip(axes, panels):
+        axis.imshow(image)
+        axis.set_title(title, fontsize=14)
+        axis.axis('off')
+    figure.canvas.manager.set_window_title('SGLN-LRQMC Image Comparison')
+    plt.show()
+
+
 def main(argv=None):
+    validate_python_version()
     args = build_parser().parse_args(argv)
     from src.sgln_lrqmc import sgln_lrqmc
 
     img_path, mask_path = resolve_paths(args)
     set_deterministic_seed(args.seed)
+    observed_mask = load_binary_mask(mask_path)
 
     config = SGLNLRQMCConfig(
         image_path=img_path,
-        observed_mask=load_binary_mask(mask_path),
+        observed_mask=observed_mask,
         lam=args.lam,
         alpha=args.alpha,
         gamma=args.gamma,
@@ -150,6 +192,9 @@ def main(argv=None):
         output_path.parent.mkdir(parents=True, exist_ok=True)
         Image.fromarray(img_recovery).save(output_path)
         print(f'Reconstruction saved to: {output_path}')
+
+    if args.show_comparison:
+        show_image_comparison(img_path, observed_mask, img_recovery)
 
 
 if __name__ == '__main__':

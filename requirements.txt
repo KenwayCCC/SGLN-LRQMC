@@ -1,4 +1,15 @@
-# Runtime dependencies for SGLN-LRQMC (Python 3.10+ and an NVIDIA GPU required).
+# Runtime dependencies for SGLN-LRQMC.
+#
+# REQUIRED INTERPRETER: 64-bit CPython 3.10.x on Windows.
+# The Windows runtime module targets CPython 3.10 on 64-bit Windows and is not
+# importable
+# from Python 3.9, 3.11, 3.12, 3.13, 32-bit Python, Linux, or macOS.
+# Create the environment before installing this file:
+#   conda create -n Clon_CV python=3.10
+#   conda activate Clon_CV
+#   python -m pip install -r requirements.txt
+#
+# An NVIDIA GPU is required.
 #
 # PyTorch and CuPy must both expose CUDA support.  The CUDA 12 CuPy wheel below
 # works with NVIDIA drivers that support CUDA 12 or later.  For a CUDA 11-only
@@ -9,6 +20,7 @@
 # Array and image I/O
 numpy>=1.24,<3
 Pillow>=9.0,<12
+matplotlib>=3.7,<4
 
 # Learned local-prior denoisers (FFDNet and DRUNet)
 torch>=2.1

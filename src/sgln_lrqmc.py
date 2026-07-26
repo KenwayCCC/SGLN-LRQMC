@@ -141,25 +141,13 @@ def sgln_lrqmc(config: SGLNLRQMCConfig):
     torch.cuda.synchronize(device)
     t_start = time.perf_counter()
     for k in range(k_max):
-        # E = Z - Lambda/mu, M = S - U/mu, N = T - V/mu in the paper.
+        b = x + lambda_q / mu
+        z_q = update_lowrank_qcomplex(b, lam, alpha, mu, t)
+    
         e = z_q - lambda_q / mu
         m_local = s - u / mu
         n_nonlocal = t_pnp - v / mu
-
-        # x_real = missing_mask * (qcomplex_to_rgb(e) + m_local + n_nonlocal) / 3.0 + y_real
-        # consensus_rgb = (
-        #         qcomplex_to_rgb(z_q - lambda_q / mu)
-        #         + s - u / mu
-        #         + t_pnp - v / mu
-        # )
-        # x_real = torch.where(
-        #         omega_mask.bool(),
-        #         y_real,
-        #         missing_mask * consensus_rgb / 3.0
-        #         + omega_mask
-        #         * (mu * consensus_rgb + y_real)
-        #         / (1.0 + 3.0 * mu)
-        # )
+    
         x_real = update_X(e, m_local, n_nonlocal, mu, y_real, missing_mask)
         x = rgb_to_qcomplex(x_real)
 
@@ -167,11 +155,8 @@ def sgln_lrqmc(config: SGLNLRQMCConfig):
 
         sigma_s = np.sqrt(gamma / mu)
         sigma_t = np.sqrt(eta / mu)
-        b = x + lambda_q / mu
         local_input = x_real + u / mu
         cbm3d_input = x_real + v / mu
-
-        z_q = update_lowrank_qcomplex(b, lam, alpha, mu, t)
         s = equivariant_denoise_torch(
             local_input,
             sigma_s,

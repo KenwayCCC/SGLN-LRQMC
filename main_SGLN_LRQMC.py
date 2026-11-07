@@ -75,7 +75,7 @@ def build_parser():
                              help='Explicit binary mask path; overrides the mask inferred from --mr.')
 
     parameter_group = parser.add_argument_group('SGLN-LRQMC parameters')
-    parameter_group.add_argument('--lambda', dest='lam', type=float, default=1,
+    parameter_group.add_argument('--lambda', dest='lam', type=float, default=0.8,
                                  help='Quaternion low-rank regularization parameter.')
     parameter_group.add_argument('--alpha', type=float, default=0.1,
                                  help='QNMF F_norm weight parameter.')

@@ -43,8 +43,8 @@ def sgln_lrqmc(config: SGLNLRQMCConfig):
 
     Returns:
         img_recovery: HWC uint8 NumPy array
-        psnr_max: maximum PSNR
-        ssim_max: maximum SSIM
+        psnr_max: PSNR of the final iterate
+        ssim_max: SSIM of the final iterate
         psnr_list: per-iteration float32 NumPy array
         err_list: per-iteration float32 NumPy array
         time_list: cumulative per-iteration float64 NumPy array
@@ -63,8 +63,6 @@ def sgln_lrqmc(config: SGLNLRQMCConfig):
     tol = config.tolerance
     # Match the notation in the paper: one shared ADMM penalty parameter mu.
     mu = config.mu
-    mu_max = config.mu_max
-    ema_weight = config.ema_weight
     k_max = config.iterations
     t = config.truncation
     seed = config.seed
@@ -99,7 +97,6 @@ def sgln_lrqmc(config: SGLNLRQMCConfig):
     s = y_real.clone()
     t_pnp = y_real.clone()
     x_real = y_real.clone()
-    x_ema_real = y_real.clone()
     x_prev_real = y_real.clone()
     lambda_q = torch.zeros_like(y_q)
     u = torch.zeros((m, n, channel), dtype=torch.float32, device=device)
@@ -123,35 +120,21 @@ def sgln_lrqmc(config: SGLNLRQMCConfig):
     ssim_list = torch.zeros(k_max, dtype=torch.float32, device=device)
     err_list = torch.zeros(k_max, dtype=torch.float32, device=device)
     time_list = np.zeros(k_max, dtype=np.float64)
-    best_img_recovery = None
     psnr_max = 0.0
     ssim_max = 0.0
 
     mode_generator = torch.Generator(device='cpu').manual_seed(seed)
-    if equivariant_pnp:
-        transform_modes = torch.randint(
-            1,
-            9,
-            (2 * k_max,),
-            generator=mode_generator,
-        ).tolist()
-    else:
-        transform_modes = [1] * (2 * k_max)
 
     torch.cuda.synchronize(device)
     t_start = time.perf_counter()
     for k in range(k_max):
         b = x + lambda_q / mu
         z_q = update_lowrank_qcomplex(b, lam, alpha, mu, t)
-    
         e = z_q - lambda_q / mu
         m_local = s - u / mu
         n_nonlocal = t_pnp - v / mu
-    
         x_real = update_X(e, m_local, n_nonlocal, mu, y_real, missing_mask)
         x = rgb_to_qcomplex(x_real)
-
-        x_ema_real = ema_weight * x_ema_real + (1.0 - ema_weight) * x_real
 
         sigma_s = np.sqrt(gamma / mu)
         sigma_t = np.sqrt(eta / mu)
@@ -162,22 +145,22 @@ def sgln_lrqmc(config: SGLNLRQMCConfig):
             sigma_s,
             local_denoise_handle,
             equivariant_pnp,
-            mode=transform_modes[2 * k + 1],
+            mode=int(torch.randint(1, 9, (), generator=mode_generator).item()),
         )
         t_pnp = equivariant_denoise_torch(
             cbm3d_input,
             sigma_t,
             cbm3d_handle,
             equivariant_pnp,
-            mode=transform_modes[2 * k],
+            mode=int(torch.randint(1, 9, (), generator=mode_generator).item()),
         )
 
         lambda_q.add_(mu * (x - z_q))
         u.add_(mu * (x_real - s))
         v.add_(mu * (x_real - t_pnp))
-        mu = min(rho * mu, mu_max)
+        mu = rho * mu
 
-        x_eval = missing_mask * torch.clamp(x_ema_real / 255.0, 0.0, 1.0) + y_real/255
+        x_eval = missing_mask * torch.clamp(x_real / 255.0, 0.0, 1.0) + y_real/255
         if k > 0 and tol>0:
             diff = x_real - x_prev_real
             rel_change = torch.linalg.vector_norm(diff) / (
@@ -191,16 +174,14 @@ def sgln_lrqmc(config: SGLNLRQMCConfig):
         psnr_list[k] = psnr_test
         ssim_test = compare_ssim_matlab_torch(x_eval, img_eval) if eval_ssim else 0.0
         ssim_list[k] = ssim_test
-        if psnr_test > psnr_max:
-            best_img_recovery = x_ema_real.clone()
-            psnr_max = psnr_test
-        ssim_max = max(ssim_max, ssim_test)
+        psnr_max = psnr_test
+        ssim_max = ssim_test
         time_list[k] = time.perf_counter() - t_start
 
         if (k + 1) % 20 == 0:
             print(
-                f'Iter {k + 1:3d} | psnr: {psnr_test:.4f} | psnr_max: {psnr_max:.4f} | '
-                f'ssim: {ssim_test:.4f} | ssim_max: {ssim_max:.8f}'
+                f'Iter {k + 1:3d} | psnr: {psnr_test:.4f} | '
+                f'ssim: {ssim_test:.4f}'
             )
         x_prev_real.copy_(x_real)
 
@@ -208,7 +189,7 @@ def sgln_lrqmc(config: SGLNLRQMCConfig):
     elapsed = time.perf_counter() - t_start
     print(f'Total Running Time: {elapsed:.2f} seconds')
 
-    img_recovery = torch.clamp(best_img_recovery, 0.0, 255.0).round().to(torch.uint8)
+    img_recovery = torch.clamp(x_real, 0.0, 255.0).round().to(torch.uint8)
     return (
         img_recovery.cpu().numpy(),
         psnr_max,
